@@ -4,6 +4,10 @@ validator = require './validator'
 validatorWrapper = (opts) ->
 	_.defaults opts, 
 		exposeMixedParams: no
+		rules: []
+	
+	for rule in opts.rules
+		validator.addRule rule.name, rule.rule
 	
 	validatorMiddleware = (req, res, next) ->
 		params = _.extend req.params || {}, req.query || {}, req.body || {}
