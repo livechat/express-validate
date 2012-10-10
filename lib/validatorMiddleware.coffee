@@ -6,9 +6,13 @@ validatorWrapper = (opts) ->
 		exposeMixedParams: no
 	
 	validatorMiddleware = (req, res, next) ->
+		params = _.extend req.params || {}, req.query || {}, req.body || {}
+		
+		if opts.exposeMixedParams
+			req.p = params
 		
 		req.validate = (rules) ->
-			result = validator.validate req.query, rules
+			result = validator.validate params, rules
 			
 			if result
 				res.send result, 400
