@@ -1,6 +1,7 @@
 Validator =
 	rules: {}
 	
+	# given a name and a rule, add the rule to rules cache
 	addRule: (name, rule) ->
 		@rules[name] = rule
 	
@@ -17,9 +18,9 @@ Validator =
 	# replaces %s with key name, $1, $2, …, with test function arguments
 	error: (rule, key, customMessage) ->
 		if customMessage
-			return customMessage.replace(/%s/g, "*"+key+"*")
+			return customMessage.replace(/%s/g, key)
 		else
-			return @rules[rule].message.replace(/%s/g, "*"+key+"*")
+			return @rules[rule].message.replace(/%s/g, key)
 	
 	# perform the validation
 	test: (obj, rule, key) ->
