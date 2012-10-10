@@ -121,4 +121,13 @@ Validator.addRule 'match',
 		pattern = rule.pattern or @pattern
 		return true unless str.match pattern
 
+Validator.addRule 'equals',
+	message: "%s isn't '%to'"
+	to: ""
+	test: (str, rule) ->
+		return false unless str
+		
+		to = rule.to or @to
+		return true unless str == to
+
 module.exports = Validator
