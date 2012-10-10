@@ -1,3 +1,5 @@
+_ = require 'underscore'
+
 _regexp = 
 	ruleName: /%s/g
 	ruleKey: /%([a-zA-Z]{1}([a-zA-Z0-9\-_]{1,})?)/g
@@ -36,12 +38,17 @@ Validator =
 	
 	# perform the validation
 	test: (obj, rule, key) ->
-		if typeof rule == 'string'
-			if @checkRule(rule) and @rules[rule].test(obj[key], rule)
-				return @error rule, key
-		else
-			if @checkRule(rule.rule) and @rules[rule.rule].test(obj[key], rule)
-				return @error rule.rule, key, rule.message, rule
+		theRule = rule
+		
+		unless typeof rule == 'string'
+			theRule = rule.rule
+		
+		if @checkRule(theRule) 
+			# allow rules using other rules by appling @rules to `test` method context
+			context = _.extend @rules[theRule], rules: @rules
+			
+			if @rules[theRule].test.call context, obj[key], rule
+				return @error theRule, key, rule.message, rule
 		
 		return false
 	
@@ -88,12 +95,22 @@ Validator.addRule 'minLength',
 		return true if typeof str isnt 'string'
 		return true if str.length < minLength
 
+Validator.addRule 'greaterThan',
+	message: "%s must be greater than %than"
+	than: 1
+	test: (str, rule) ->
+		return false unless str
+		
+		than = rule.than or @than
+		
+		return true unless parseInt(str, 10) > than
+
 Validator.addRule 'nonNegative',
 	message: "%s must be non-negative"
 	test: (str) ->
 		return false unless str
 		
-		return true unless parseInt(str, 10) >= 0
+		@rules.greaterThan.test str, than: -1
 
 Validator.addRule 'match',
 	message: "%s doesn't match the required pattern"
