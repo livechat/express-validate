@@ -2,6 +2,7 @@ _ = require 'underscore'
 validator = require './validator'
 
 validatorWrapper = (opts) ->
+	opts = opts or {}
 	_.defaults opts, 
 		exposeMixedParams: no
 		rules: []
