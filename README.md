@@ -72,7 +72,6 @@ Validation code:
 			message: 'Hey, you must be over %than to see the content. Please, provide the correct %s' 
 		}]
 	}
-
 ```
 
 Requests:
@@ -84,7 +83,6 @@ age is requried.
 Hey, you must be over 18 to see the content. Please, provide the correct age
 ~ ➢ curl "localhost:3000/?name=maciej&age=24"
 it's ok
-
 ```
 
 ### Adding custom rules
