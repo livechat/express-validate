@@ -18,7 +18,7 @@ Validator =
 		if typeof name == 'string' and rule and typeof rule.test == 'function' and typeof rule.message == 'string'
 			return true
 		
-		throw new Error 'This is not a complete rule. A complete rule must contain both `test` function and `message` string.'
+		throw new Error name + ' is not a complete rule. A complete rule must contain both `test` function and `message` string.'
 	
 	# parses error messages
 	# replaces %s with key name, %argName with rule.argName
