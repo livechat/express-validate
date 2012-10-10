@@ -61,12 +61,12 @@ Validator =
 		return false
 
 Validator.addRule 'required',
-	message: '%s is requried.'
+	message: "%s is requried."
 	test: (str) ->
 		return true unless str
 
 Validator.addRule 'email',
-	message: '%s must be a valid e-mail address.'
+	message: "%s must be a valid e-mail address."
 	regex: ///^
 	([\w\!\#$\%\&\'\*\+\-\/\=\?\^\`{\|\}\~]+\.)*
 	[\w\!\#$\%\&\'\*\+\-\/\=\?\^\`{\|\}\~]+
@@ -74,14 +74,34 @@ Validator.addRule 'email',
 	((((([a-z0-9]{1}[a-z0-9\-]{0,62}[a-z0-9]{1})|[a-z])\.)+[a-z]{2,6})|(\d{1,3}\.){3}\d{1,3}(\:\d{1,5})?)$
 	///i
 	test: (str) ->
+		return false unless str
 		return not @regex.test str
 
 Validator.addRule 'minLength',
-	message: '%s must be at least %minLength char long'
+	message: "%s must be at least %minLength char long"
 	minLength: 1
 	test: (str, rule) ->
+		return false unless str
+		
 		minLength = rule.minLength or @minLength
+		
 		return true if typeof str isnt 'string'
 		return true if str.length < minLength
+
+Validator.addRule 'nonNegative',
+	message: "%s must be non-negative"
+	test: (str) ->
+		return false unless str
+		
+		return true unless parseInt(str, 10) >= 0
+
+Validator.addRule 'match',
+	message: "%s doesn't match the required pattern"
+	pattern: //
+	test: (str, rule) ->
+		return false unless str
+		
+		pattern = rule.pattern or @pattern
+		return true unless str.match pattern
 
 module.exports = Validator
