@@ -1,3 +1,7 @@
+_regexp = 
+	ruleName: /%s/g
+	ruleKey: /%([a-zA-Z]{1}([a-zA-Z0-9\-_]{1,})?)/g
+
 Validator =
 	rules: {}
 	
@@ -15,21 +19,29 @@ Validator =
 		throw new Error 'This is not a complete rule. A complete rule must contain both `test` function and `message` string.'
 	
 	# parses error messages
-	# replaces %s with key name, $1, $2, …, with test function arguments
-	error: (rule, key, customMessage) ->
-		if customMessage
-			return customMessage.replace(/%s/g, key)
-		else
-			return @rules[rule].message.replace(/%s/g, key)
+	# replaces %s with key name, %argName with rule.argName
+	error: (rule, key, message, ruleArgs) ->
+		unless message
+			# no custom message passed
+			message = @rules[rule].message
+		return message.
+			replace(_regexp.ruleName, key).
+			replace(_regexp.ruleKey, (whole, first) =>
+				if ruleArgs[first]
+					return ruleArgs[first]
+				else if @rules[rule][first]
+					return @rules[rule][first]
+				return whole
+			)
 	
 	# perform the validation
 	test: (obj, rule, key) ->
 		if typeof rule == 'string'
-			if @checkRule(rule) and @rules[rule].test(obj[key])
+			if @checkRule(rule) and @rules[rule].test(obj[key], rule)
 				return @error rule, key
 		else
-			if @checkRule(rule.rule) and @rules[rule.rule].test(obj[key])
-				return @error rule.rule, key, rule.message
+			if @checkRule(rule.rule) and @rules[rule.rule].test(obj[key], rule)
+				return @error rule.rule, key, rule.message, rule
 		
 		return false
 	
@@ -62,10 +74,14 @@ Validator.addRule 'email',
 	((((([a-z0-9]{1}[a-z0-9\-]{0,62}[a-z0-9]{1})|[a-z])\.)+[a-z]{2,6})|(\d{1,3}\.){3}\d{1,3}(\:\d{1,5})?)$
 	///i
 	test: (str) ->
-		return !@regex.test str
+		return not @regex.test str
 
 Validator.addRule 'minLength',
-	message: '%s must be at least %1 char long'
-	test: (str, minLength) ->
+	message: '%s must be at least %minLength char long'
+	minLength: 1
+	test: (str, rule) ->
+		minLength = rule.minLength or @minLength
+		return true if typeof str isnt 'string'
+		return true if str.length < minLength
 
 module.exports = Validator
