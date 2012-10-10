@@ -84,33 +84,65 @@ Validator.addRule 'email',
 		return false unless str
 		return not @regex.test str
 
+Validator.addRule 'lengthBetween',
+	message: "%s must be between %low and %high characters long"
+	low: 0
+	high: 5
+	test: (str, rule) ->
+		return false unless str
+		return true unless typeof str == 'string'
+		
+		low = rule.low or @low
+		high = rule.high or @high
+		len = str.length
+		
+		return true unless low <= len <= high
+
 Validator.addRule 'minLength',
-	message: "%s must be at least %minLength char long"
+	message: "%s must be at least %minLength characters long"
 	minLength: 1
+	test: (str, rule) ->
+		minLength = rule.minLength or @minLength
+		return @rules.lengthBetween.test str, {low: minLength, high: Infinity}
+
+Validator.addRule 'maxLength',
+	message: "%s must be at most %maxLength characters long"
+	maxLength: 1
+	test: (str, rule) ->
+		maxLength = rule.maxLength or @maxLenght
+		return @rules.lengthBetween.test str, {low: 0, high: maxLength}
+
+Validator.addRule 'between',
+	message: "%s must be between %low and %high"
+	low: 0
+	high: 0
 	test: (str, rule) ->
 		return false unless str
 		
-		minLength = rule.minLength or @minLength
+		str = parseInt(str, 10)
+		low = rule.low or @low
+		high = rule.high or @high
 		
-		return true if typeof str isnt 'string'
-		return true if str.length < minLength
+		return true unless low <= str <= high
 
 Validator.addRule 'greaterThan',
 	message: "%s must be greater than %than"
-	than: 1
+	than: 0
 	test: (str, rule) ->
-		return false unless str
-		
 		than = rule.than or @than
-		
-		return true unless parseInt(str, 10) > than
+		return @rules.between.test str, {low: than+1, high: Infinity}
+
+Validator.addRule 'lowerThan',
+	message: "%s must be lower than %than"
+	than: 0
+	test: (str, rule) ->
+		than = rule.than or @than
+		return @rules.between.test str, {low: -Infinity, high: than-1}
 
 Validator.addRule 'nonNegative',
 	message: "%s must be non-negative"
 	test: (str) ->
-		return false unless str
-		
-		@rules.greaterThan.test str, than: -1
+		return @rules.between.test str, {low: -1, high: Infinity}
 
 Validator.addRule 'match',
 	message: "%s doesn't match the required pattern"

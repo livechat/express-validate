@@ -9,8 +9,12 @@ A very simple Express middleware to… well, validate stuff.
 * required
 * email
 * equals
+* lengthBetween
+* maxLength
 * minLength
+* between
 * greaterThan
+* lowerThan
 * nonNegative
 * match
 * …write your your own!
