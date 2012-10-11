@@ -28,7 +28,7 @@ app.use validator options
 
 `options` is an object with possible properties:
 
-* rules - (*object*) - additional rules (described later)
+* `rules` - (*object*) - additional rules (described later)
 * `errorParser` - (*function*) - a function taking 3 arguments: `req`, `res` and `errors` (an array of error messages). If validation resulted in no errors, `errors` will be an empty array.
   
   example usage - returning JSON object
