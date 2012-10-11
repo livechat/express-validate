@@ -53,18 +53,20 @@ Validator =
 		return false
 	
 	validate: (obj, ruleset) ->
+		errors = []
 		for key, rule of ruleset
 			# check if it's an array of rules
 			if Array.isArray rule
 				for nestedRule in rule
 					testResult = @test obj, nestedRule, key
-					return testResult if testResult
+					errors.push testResult if testResult
 			
 			# single rule
 			else
 				testResult = @test obj, rule, key
-				return testResult if testResult 
+				errors.push testResult if testResult
 		
+		return errors if errors.length
 		return false
 
 Validator.addRule 'required',
