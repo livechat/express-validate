@@ -5,6 +5,8 @@ _regexp =
 	ruleKey: /%([a-zA-Z]{1}([a-zA-Z0-9\-_]{1,})?)/g
 
 Validator =
+	options: 
+		errorParser: null
 	rules: {}
 	
 	# given a name and a rule, add the rule to rules cache
@@ -67,7 +69,7 @@ Validator =
 				errors.push testResult if testResult
 		
 		return errors if errors.length
-		return false
+		return []
 
 Validator.addRule 'required',
 	message: "%s is requried."

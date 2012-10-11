@@ -6,6 +6,7 @@ validatorWrapper = (opts) ->
 	_.defaults opts, 
 		exposeMixedParams: no
 		rules: []
+		errorParser: null
 	
 	for rule in opts.rules
 		validator.addRule rule.name, rule.rule
@@ -19,8 +20,12 @@ validatorWrapper = (opts) ->
 		req.validate = (rules) ->
 			result = validator.validate params, rules
 			
-			if result
-				res.send result, 400
+			if result.length and not opts.errorParser
+				res.send result.join('\n'), 400
+			else if result and opts.errorParser and typeof opts.errorParser == 'function'
+				opts.errorParser req, res, result
+			else if result and opts.errorParser
+				throw new TypeError 'errorParser must be a function'
 		
 		next()
 	

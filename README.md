@@ -19,6 +19,29 @@ A very simple Express middleware to… well, validate stuff.
 * match
 * …write your your own!
 
+## Options
+
+```
+validator = require '../lib/express-validate'
+app.use validator options
+```
+
+`options` is an object with possible properties:
+
+* rules - (*object*) - additional rules (described later)
+* `errorParser` - (*function*) - a function taking 3 arguments: `req`, `res` and `errors` (an array of error messages). If validation resulted in no errors, `errors` will be an empty array.
+  
+  example usage - returning JSON object
+  
+  ```
+  errorParser: (req, res, err) ->
+		res.send {
+			errors: err
+		}
+  ```
+  
+* `exposeMixedParams` - (*bool*) - if `true`, `req.p` will become an object containing params available in `req.params`, `req.query` and `req.body`.
+
 
 ## Usage examples
 
