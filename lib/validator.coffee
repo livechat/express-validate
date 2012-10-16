@@ -148,6 +148,11 @@ Validator.addRule 'nonNegative',
 	test: (str) ->
 		return @rules.between.test str, {low: -1, high: Infinity}
 
+Validator.addRule 'integer',
+	message: "%s must be an integer"
+	test: (str) ->
+		return str % 1 != 0
+
 Validator.addRule 'match',
 	message: "%s doesn't match the required pattern"
 	pattern: //
