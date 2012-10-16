@@ -1,0 +1,25 @@
+{
+	"name": "express-validate",
+	"description": "A very simple Express middleware to validate stuff.",
+	"author": "Maciej Pawlowski <me@mpawlowski.pl>",
+	"version": "0.1",
+	"homepage": "https://github.com/mpa/express-validate",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/mpa/express-validate.git"
+	},
+	"main": "./index.coffee",
+	"engines": {
+		"node": "*"
+	},
+	"dependencies": {
+		"underscore": "1.4.x"
+	},
+	"keywords": [
+		"express",
+		"validate",
+		"validation",
+		"middleware"
+	],
+	"license": "MIT"
+}
