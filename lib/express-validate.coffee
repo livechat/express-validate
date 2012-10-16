@@ -6,26 +6,28 @@ validatorWrapper = (opts) ->
 	_.defaults opts, 
 		exposeMixedParams: no
 		rules: []
-		errorParser: null
+		asJSON: yes
 	
 	for rule in opts.rules
 		validator.addRule rule.name, rule.rule
 	
 	validatorMiddleware = (req, res, next) ->
-		params = _.extend req.params || {}, req.query || {}, req.body || {}
-		
-		if opts.exposeMixedParams
-			req.p = params
 		
 		req.validate = (rules) ->
+			params = _.extend req.params || {}, req.query || {}, req.body || {}
+			
+			if opts.exposeMixedParams
+				req.p = params
+			
 			result = validator.validate params, rules
 			
-			if result.length and not opts.errorParser
-				res.send result.join('\n'), 400
-			else if result and opts.errorParser and typeof opts.errorParser == 'function'
-				opts.errorParser req, res, result
-			else if result and opts.errorParser
-				throw new TypeError 'errorParser must be a function'
+			if result.length
+				if opts.asJSON
+					return {errors: result}
+				else
+					return result.join '\n'
+			else
+				return false
 		
 		next()
 	
