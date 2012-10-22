@@ -13,8 +13,11 @@ validatorWrapper = (opts) ->
 	
 	validatorMiddleware = (req, res, next) ->
 		
+		req.defaults = (defaults) ->
+			req.p = _.defaults req.p || {}, defaults
+		
 		req.validate = (rules) ->
-			params = _.extend req.params || {}, req.query || {}, req.body || {}
+			params = _.extend req.p || {}, req.params || {}, req.query || {}, req.body || {}
 			
 			if opts.exposeMixedParams
 				req.p = params
@@ -22,12 +25,16 @@ validatorWrapper = (opts) ->
 			result = validator.validate params, rules
 			
 			if result.length
+				res.responseCode = 400
+				
 				if opts.asJSON
-					return {errors: result}
+					res.send {errors: result}
+					return false
 				else
-					return result.join '\n'
+					res.send result.join '\n'
+					return false
 			else
-				return false
+				return true
 		
 		next()
 	
