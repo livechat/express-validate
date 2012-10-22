@@ -1,6 +1,14 @@
 _ = require 'underscore'
 validator = require './validator'
 
+compactObject = (obj) ->
+	for i of obj
+		if obj.hasOwnProperty i
+			if !obj[i] and typeof obj[i] != 'number'
+				delete obj[i]
+	
+	return obj
+
 validatorWrapper = (opts) ->
 	opts = opts or {}
 	_.defaults opts, 
@@ -17,7 +25,7 @@ validatorWrapper = (opts) ->
 			req.p = _.defaults req.p || {}, defaults
 		
 		req.validate = (rules) ->
-			params = _.extend req.p || {}, req.params || {}, req.query || {}, req.body || {}
+			params = _.extend req.p || {}, compactObject(req.params), compactObject(req.query), compactObject(req.body)
 			
 			if opts.exposeMixedParams
 				req.p = params
