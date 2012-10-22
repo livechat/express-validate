@@ -71,12 +71,12 @@ Validator =
 		return []
 
 Validator.addRule 'required',
-	message: "%s is requried."
+	message: "%s is requried"
 	test: (str) ->
 		return true unless str
 
 Validator.addRule 'email',
-	message: "%s must be a valid e-mail address."
+	message: "%s must be a valid e-mail address"
 	regex: ///^
 	([\w\!\#$\%\&\'\*\+\-\/\=\?\^\`{\|\}\~]+\.)*
 	[\w\!\#$\%\&\'\*\+\-\/\=\?\^\`{\|\}\~]+
