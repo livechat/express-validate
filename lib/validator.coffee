@@ -39,7 +39,7 @@ Validator =
 			)
 	
 	# perform the validation
-	test: (obj, rule, key) ->
+	testInternal: (obj, rule, key) ->
 		theRule = rule
 		
 		unless typeof rule == 'string'
@@ -47,8 +47,7 @@ Validator =
 		
 		if @checkRule(theRule) 
 			# allow rules using other rules by appling @rules to `test` method context
-			context = _.extend @rules[theRule], rules: @rules
-			
+			context = _.defaults @rules[theRule], @
 			if @rules[theRule].test.call context, obj[key], rule
 				return @error theRule, key, rule.message, rule
 		
@@ -60,12 +59,12 @@ Validator =
 			# check if it's an array of rules
 			if Array.isArray rule
 				for nestedRule in rule
-					testResult = @test obj, nestedRule, key
+					testResult = @testInternal obj, nestedRule, key
 					errors.push testResult if testResult
 			
 			# single rule
 			else
-				testResult = @test obj, rule, key
+				testResult = @testInternal obj, rule, key
 				errors.push testResult if testResult
 		
 		return errors if errors.length
@@ -106,14 +105,14 @@ Validator.addRule 'minLength',
 	message: "%s must be at least %minLength characters long"
 	minLength: 1
 	test: (str, rule) ->
-		minLength = rule.minLength or @minLength
+		minLength = rule?.minLength or @minLength
 		return @rules.lengthBetween.test str, {low: minLength, high: Infinity}
 
 Validator.addRule 'maxLength',
 	message: "%s must be at most %maxLength characters long"
 	maxLength: 1
 	test: (str, rule) ->
-		maxLength = rule.maxLength or @maxLenght
+		maxLength = rule?.maxLength or @maxLenght
 		return @rules.lengthBetween.test str, {low: 0, high: maxLength}
 
 Validator.addRule 'between',
