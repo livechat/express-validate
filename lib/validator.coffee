@@ -148,7 +148,7 @@ Validator.addRule 'nonNegative',
 		return @rules.between.test str, {low: -1, high: Infinity}
 
 Validator.addRule 'positive',
-	message: "%s must be postiive"
+	message: "%s must be positive"
 	test: (str) ->
 		return @rules.between.test str, {low: 1, high: Infinity}
 
