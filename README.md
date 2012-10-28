@@ -16,6 +16,8 @@ A very simple Express middleware to… well, validate stuff.
 * greaterThan
 * lowerThan
 * nonNegative
+* positive
+* negative
 * match
 * …write your your own!
 
