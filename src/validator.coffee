@@ -71,7 +71,7 @@ Validator =
 		return []
 
 Validator.addRule 'required',
-	message: "%s is requried"
+	message: "%s is required"
 	test: (str) ->
 		return true unless str
 
