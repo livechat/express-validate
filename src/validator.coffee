@@ -160,6 +160,7 @@ Validator.addRule 'negative',
 Validator.addRule 'integer',
 	message: "%s must be an integer"
 	test: (str) ->
+		return false unless str?
 		return str % 1 != 0
 
 Validator.addRule 'match',
