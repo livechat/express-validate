@@ -33,13 +33,11 @@ validatorWrapper = (opts) ->
 			result = validator.validate params, rules
 			
 			if result.length
-				res.responseCode = 400
-				
 				if opts.asJSON
-					res.send {errors: result}
+					res.send {errors: result}, 400
 					return false
 				else
-					res.send result.join '\n'
+					res.send result.join('\n'), 400
 					return false
 			else
 				return true
