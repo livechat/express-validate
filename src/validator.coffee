@@ -48,8 +48,9 @@ Validator =
 		if @checkRule(theRule) 
 			# allow rules using other rules by appling @rules to `test` method context
 			context = _.defaults @rules[theRule], @
-			if @rules[theRule].test.call context, obj[key], rule
-				return @error theRule, key, rule.message, rule
+			if theRule == 'required' or obj[key]?
+				unless @rules[theRule].test.call context, obj[key], rule
+					return @error theRule, key, rule.message, rule
 		
 		return false
 	
@@ -73,7 +74,7 @@ Validator =
 Validator.addRule 'required',
 	message: "%s is required"
 	test: (str) ->
-		return true unless str
+		return str?
 
 Validator.addRule 'email',
 	message: "%s must be a valid e-mail address"
@@ -84,22 +85,20 @@ Validator.addRule 'email',
 	((((([a-z0-9]{1}[a-z0-9\-]{0,62}[a-z0-9]{1})|[a-z])\.)+[a-z]{2,6})|(\d{1,3}\.){3}\d{1,3}(\:\d{1,5})?)$
 	///i
 	test: (str) ->
-		return false unless str
-		return not @regex.test str
+		return @regex.test str
 
 Validator.addRule 'lengthBetween',
 	message: "%s must be between %low and %high characters long"
 	low: 0
 	high: 5
 	test: (str, rule) ->
-		return false unless str
-		return true unless typeof str == 'string'
+		return false unless typeof str == 'string'
 		
 		low = rule.low or @low
 		high = rule.high or @high
 		len = str.length
 		
-		return true unless low <= len <= high
+		return (low <= len <= high)
 
 Validator.addRule 'minLength',
 	message: "%s must be at least %minLength characters long"
@@ -120,13 +119,11 @@ Validator.addRule 'between',
 	low: 0
 	high: 0
 	test: (str, rule) ->
-		return false unless str
-		
 		str = parseInt(str, 10)
 		low = rule.low or @low
 		high = rule.high or @high
 		
-		return true unless low <= str <= high
+		return (low <= str <= high)
 
 Validator.addRule 'greaterThan',
 	message: "%s must be greater than %than"
@@ -160,25 +157,20 @@ Validator.addRule 'negative',
 Validator.addRule 'integer',
 	message: "%s must be an integer"
 	test: (str) ->
-		return false unless str?
-		return str % 1 != 0
+		return str % 1 == 0
 
 Validator.addRule 'match',
 	message: "%s doesn't match the required pattern"
 	pattern: //
 	test: (str, rule) ->
-		return false unless str
-		
 		pattern = rule.pattern or @pattern
-		return true unless str.match pattern
+		return str.match pattern
 
 Validator.addRule 'equals',
 	message: "%s isn't '%to'"
 	to: ""
 	test: (str, rule) ->
-		return false unless str
-		
 		to = rule.to or @to
-		return true unless str == to
+		return str == to
 
 module.exports = Validator
