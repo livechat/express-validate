@@ -112,7 +112,7 @@ Validator.addRule 'maxLength',
 	message: "%s must be at most %maxLength characters long"
 	maxLength: 1
 	test: (str, rule) ->
-		maxLength = rule?.maxLength or @maxLenght
+		maxLength = rule?.maxLength or @maxLength
 		return @rules.lengthBetween.test str, {low: 0, high: maxLength}
 
 Validator.addRule 'between',
