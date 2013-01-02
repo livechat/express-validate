@@ -1,5 +1,5 @@
 express = require 'express'
-validator = require '../lib/validatorMiddleware'
+validator = require '../lib/express-validate'
 
 app = express.createServer()
 
