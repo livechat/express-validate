@@ -15,9 +15,9 @@ validatorWrapper = (opts) ->
 		
 		req.defaults = (defaults) ->
 			req.p = _.defaults req.p || {}, defaults
-		
+			
 		req.validate = (rules) ->
-			params = _.defaults req.p || {}, req.files, req.params, req.query, req.body
+			params = _.extend {}, req.p, req.files, req.params, req.query, req.body
 			
 			if opts.exposeMixedParams
 				req.p = params
