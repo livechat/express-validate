@@ -2,7 +2,7 @@
 	"name": "express-validate",
 	"description": "A very simple Express middleware to validate stuff.",
 	"author": "Maciej Pawlowski <me@mpawlowski.pl>",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"homepage": "https://github.com/mpa/express-validate",
 	"repository": {
 		"type": "git",
