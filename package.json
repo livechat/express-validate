@@ -1,12 +1,21 @@
 {
 	"name": "express-validate",
 	"description": "A very simple Express middleware to validate stuff.",
-	"author": "Maciej Pawlowski <me@mpawlowski.pl>",
-	"version": "0.1.2",
-	"homepage": "https://github.com/mpa/express-validate",
+	"contributors": [
+		{
+			"name": "Maciej Pawlowski",
+			"email": "me@mpawlowski.pl"
+		},
+		{
+			"name": "Bartlomiej Kubiak",
+			"email": "b.kubiak@livechatinc.com"
+		}
+	],
+	"version": "0.1.3",
+	"homepage": "https://github.com/livechat/express-validate",
 	"repository": {
 		"type": "git",
-		"url": "git://github.com/mpa/express-validate.git"
+		"url": "git://github.com/livechat/express-validate.git"
 	},
 	"main": "./index.js",
 	"engines": {

@@ -26,7 +26,12 @@ validatorWrapper = (opts) ->
 			
 			if result.length
 				if opts.asJSON
-					res.send {errors: result}, 400
+					response = {errors: result}
+					if req.query.post_message
+						response.fromAPI = 1
+						b64 = new Buffer(JSON.stringify response).toString 'base64'
+						response =  "<script>window.parent.postMessage('#{b64}','*')</script>"
+					res.send response, 400
 					return false
 				else
 					res.send result.join('\n'), 400
