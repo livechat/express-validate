@@ -1,29 +1,35 @@
 _ = require 'underscore'
 validator = require './validator'
+parser = require './parser'
 
 validatorWrapper = (opts) ->
 	opts = opts or {}
-	_.defaults opts, 
+	_.defaults opts,
 		exposeMixedParams: no
 		rules: []
 		asJSON: yes
-	
+
 	for rule in opts.rules
 		validator.addRule rule.name, rule.rule
-	
+
 	validatorMiddleware = (req, res, next) ->
-		
+		req.parse = (ruleset) =>
+			req.files = parser.parse req.files, ruleset
+			req.p = parser.parse req.p, ruleset
+			req.query = parser.parse req.query, ruleset
+			req.body = parser.parse req.body, ruleset
+
 		req.defaults = (defaults) ->
 			req.p = _.defaults req.p || {}, defaults
-			
+
 		req.validate = (rules) ->
 			params = _.extend {}, req.p, req.files, req.params, req.query, req.body
-			
+
 			if opts.exposeMixedParams
 				req.p = params
-			
+
 			result = validator.validate params, rules
-			
+
 			if result.length
 				if opts.asJSON
 					response = {errors: result}
@@ -38,9 +44,9 @@ validatorWrapper = (opts) ->
 					return false
 			else
 				return true
-		
+
 		next()
-	
+
 	# expose the public API
 	return validatorMiddleware
 

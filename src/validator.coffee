@@ -1,27 +1,27 @@
 _ = require 'underscore'
 
-_regexp = 
+_regexp =
 	ruleName: /%s/g
 	ruleKey: /%([a-zA-Z]{1}([a-zA-Z0-9\-_]{1,})?)/g
 
 Validator =
-	options: 
+	options:
 		errorParser: null
 	rules: {}
-	
+
 	# given a name and a rule, add the rule to rules cache
 	addRule: (name, rule) ->
 		@rules[name] = rule
-	
-	# given the rule's name, return whether it's a valid rule 
+
+	# given the rule's name, return whether it's a valid rule
 	# (it has to have both test & message properties)
 	checkRule: (name) ->
 		rule = @rules[name]
 		if typeof name == 'string' and rule and typeof rule.test == 'function' and typeof rule.message == 'string'
 			return true
-		
+
 		throw new Error name + ' is not a complete rule. A complete rule must contain both `test` function and `message` string.'
-	
+
 	# parses error messages
 	# replaces %s with key name, %argName with rule.argName
 	error: (rule, key, message, ruleArgs) ->
@@ -37,23 +37,23 @@ Validator =
 					return @rules[rule][first]
 				return whole
 			)
-	
+
 	# perform the validation
 	testInternal: (obj, rule, key) ->
 		theRule = rule
-		
+
 		unless typeof rule == 'string'
 			theRule = rule.rule
-		
-		if @checkRule(theRule) 
+
+		if @checkRule(theRule)
 			# allow rules using other rules by appling @rules to `test` method context
 			context = _.defaults @rules[theRule], @
 			if theRule == 'required' or obj[key]?
 				unless @rules[theRule].test.call context, obj[key], rule
 					return @error theRule, key, rule.message, rule
-		
+
 		return false
-	
+
 	validate: (obj, ruleset) ->
 		errors = []
 		for key, rule of ruleset
@@ -62,12 +62,12 @@ Validator =
 				for nestedRule in rule
 					testResult = @testInternal obj, nestedRule, key
 					errors.push testResult if testResult
-			
+
 			# single rule
 			else
 				testResult = @testInternal obj, rule, key
 				errors.push testResult if testResult
-		
+
 		return errors if errors.length
 		return []
 
@@ -93,11 +93,11 @@ Validator.addRule 'lengthBetween',
 	high: 5
 	test: (str, rule) ->
 		return false unless typeof str == 'string'
-		
+
 		low = rule.low or @low
 		high = rule.high or @high
 		len = str.length
-		
+
 		return (low <= len <= high)
 
 Validator.addRule 'minLength',
@@ -122,7 +122,7 @@ Validator.addRule 'between',
 		str = parseInt(str, 10)
 		low = rule.low or @low
 		high = rule.high or @high
-		
+
 		return (low <= str <= high)
 
 Validator.addRule 'greaterThan',
@@ -161,7 +161,7 @@ Validator.addRule 'integer',
 
 Validator.addRule 'match',
 	message: "%s doesn't match the required pattern"
-	pattern: //
+	pattern: /(.)*/
 	test: (str, rule) ->
 		pattern = rule.pattern or @pattern
 		return str.match pattern
