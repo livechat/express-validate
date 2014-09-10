@@ -25,4 +25,12 @@ Parser.addParser 'binary',
 	parse: (value) ->
 		if /^(true|[1-9]+[0-9]*)$/i.test value then 1 else 0
 
+Parser.addParser 'lowercase',
+	parse: (value) ->
+		return value.toString().toLowerCase()
+
+Parser.addParser 'uppercase',
+	parse: (value) ->
+		return value.toString().toUpperCase()
+
 module.exports = Parser
