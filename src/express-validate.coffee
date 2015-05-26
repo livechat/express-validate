@@ -7,10 +7,14 @@ validatorWrapper = (opts) ->
 	_.defaults opts,
 		exposeMixedParams: no
 		rules: []
+		parsers: []
 		asJSON: yes
 
 	for rule in opts.rules
 		validator.addRule rule.name, rule.rule
+
+	for p in opts.parsers
+		parser.addParser p.name, p.parser
 
 	validatorMiddleware = (req, res, next) ->
 		req.parse = (ruleset) =>

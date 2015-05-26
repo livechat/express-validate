@@ -33,4 +33,8 @@ Parser.addParser 'uppercase',
 	parse: (value) ->
 		return value.toString().toUpperCase()
 
+Parser.addParser 'integer',
+	parse: (value) ->
+		return parseInt(value, 10)
+
 module.exports = Parser
