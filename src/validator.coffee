@@ -31,9 +31,9 @@ Validator =
 		return message.
 			replace(_regexp.ruleName, key).
 			replace(_regexp.ruleKey, (whole, first) =>
-				if ruleArgs[first]
+				if ruleArgs[first]?
 					return ruleArgs[first]
-				else if @rules[rule][first]
+				else if @rules[rule][first]?
 					return @rules[rule][first]
 				return whole
 			)
