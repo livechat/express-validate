@@ -52,7 +52,6 @@ validatorWrapper = (opts) ->
 
 		next()
 
-	validatorMiddleware.validator = validator
 	# expose the public API
 	return validatorMiddleware
 

@@ -20,7 +20,7 @@ Validator =
 
 		switch rule.recurrent
 			when true
-				if typeof name == 'string' and rule and typeof rule.test == 'function' and rule.validators
+				if typeof name == 'string' and rule and typeof rule.test == 'function' and rule.ruleset
 					return true
 			else
 				if typeof name == 'string' and rule and typeof rule.test == 'function' and typeof rule.message == 'string'
@@ -73,6 +73,12 @@ Validator =
 
 	validate: (obj, ruleset) ->
 		errors = []
+		if _.isString ruleset
+			try
+				ruleset = @rules[ruleset].ruleset
+			catch e
+				throw new Error "missing #{ruleset} validation rule"
+
 		for key, rule of ruleset
 			# check if it's an array of rules
 			if Array.isArray rule
@@ -174,7 +180,10 @@ Validator.addRule 'negative',
 Validator.addRule 'integer',
 	message: "%s must be an integer"
 	test: (str) ->
-		return str % 1 == 0
+		if _.isNumber(str) and parseInt(str, 10).toString() is str.toString() and not _.isNaN(str)
+			return true
+
+		return false
 
 Validator.addRule 'match',
 	message: "%s doesn't match the required pattern"
@@ -189,5 +198,55 @@ Validator.addRule 'equals',
 	test: (str, rule) ->
 		to = rule.to or @to
 		return str == to
+
+Validator.addRule 'list',
+	recurrent: true
+	message: "invalid %s list"
+	ruleset: 'required'
+	test: (array, rule) ->
+		errors = []
+		ruleset = rule.ruleset || @ruleset
+
+		for element, index in array
+			error = @validate {element:element}, {element: ruleset}
+			if error.length
+				e = {}
+				e[index] = error
+				errors.push e
+
+		return errors
+
+Validator.addRule 'notEmpty',
+	message: "%s can't be empty array"
+	test: (obj) ->
+		return not _.isEmpty obj
+
+Validator.addRule 'array',
+	message: "%s must be an array"
+	test: (obj) ->
+		return _.isArray obj
+
+Validator.addRule 'binary',
+	message: "%s must be either '0' or '1'"
+	test: (str) ->
+		unless str? then return false
+		return str.toString() in ['0', '1']
+
+
+Validator.addRule 'order',
+	order: ['asc', 'desc']
+	message: "%s must be either 'asc' or 'desc'"
+	test: (order) ->
+		return order in @order
+
+Validator.addRule 'zipcode',
+	message: "%s must be valid zip code format XX-XXX"
+	test: (code) ->
+		return /(^\d{3}-\d{2}$)/.test code
+
+Validator.addRule 'deny',
+	message: "%s is forbidden"
+	test: ->
+		return false
 
 module.exports = Validator
