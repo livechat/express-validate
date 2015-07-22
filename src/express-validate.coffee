@@ -17,6 +17,7 @@ validatorWrapper = (opts) ->
 		parser.addParser p.name, p.parser
 
 	validatorMiddleware = (req, res, next) ->
+		console.log arguments
 		req.parse = (ruleset) =>
 			req.files = parser.parse req.files, ruleset
 			req.p = parser.parse req.p, ruleset
@@ -51,6 +52,7 @@ validatorWrapper = (opts) ->
 
 		next()
 
+	validatorMiddleware.validator = validator
 	# expose the public API
 	return validatorMiddleware
 

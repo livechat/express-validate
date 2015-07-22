@@ -17,8 +17,14 @@ Validator =
 	# (it has to have both test & message properties)
 	checkRule: (name) ->
 		rule = @rules[name]
-		if typeof name == 'string' and rule and typeof rule.test == 'function' and typeof rule.message == 'string'
-			return true
+
+		switch rule.recurrent
+			when true
+				if typeof name == 'string' and rule and typeof rule.test == 'function' and rule.validators
+					return true
+			else
+				if typeof name == 'string' and rule and typeof rule.test == 'function' and typeof rule.message == 'string'
+					return true
 
 		throw new Error name + ' is not a complete rule. A complete rule must contain both `test` function and `message` string.'
 
@@ -47,9 +53,20 @@ Validator =
 
 		if @checkRule(theRule)
 			# allow rules using other rules by appling @rules to `test` method context
+			unless @rules[theRule].recurrent? then @rules[theRule].recurrent = false
+
 			context = _.defaults @rules[theRule], @
 			if theRule == 'required' or obj[key]?
-				unless @rules[theRule].test.call context, obj[key], rule
+				error = @rules[theRule].test.call context, obj[key], rule
+
+				if @rules[theRule].recurrent
+					if error.length
+						message = @error theRule, key, rule.message, rule
+						err = {}
+						err[message] = error
+						return err
+
+				else if error is false
 					return @error theRule, key, rule.message, rule
 
 		return false
