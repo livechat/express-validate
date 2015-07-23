@@ -180,10 +180,7 @@ Validator.addRule 'negative',
 Validator.addRule 'integer',
 	message: "%s must be an integer"
 	test: (str) ->
-		if _.isNumber(str) and parseInt(str, 10).toString() is str.toString() and not _.isNaN(str)
-			return true
-
-		return false
+		return /^-?[0-9]+$/.test str
 
 Validator.addRule 'match',
 	message: "%s doesn't match the required pattern"
