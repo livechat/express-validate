@@ -20,7 +20,7 @@ Validator =
 
 		switch rule.recurrent
 			when true
-				if typeof name == 'string' and rule and typeof rule.test == 'function' and rule.ruleset
+				if typeof name == 'string' and rule and rule.ruleset
 					return true
 			else
 				if typeof name == 'string' and rule and typeof rule.test == 'function' and typeof rule.message == 'string'
@@ -57,17 +57,18 @@ Validator =
 
 			context = _.defaults @rules[theRule], @
 			if theRule == 'required' or obj[key]?
-				error = @rules[theRule].test.call context, obj[key], rule
 
 				if @rules[theRule].recurrent
+					error = @validate obj[key], @rules[theRule].ruleset
 					if error.length
 						message = @error theRule, key, rule.message, rule
 						err = {}
 						err[message] = error
 						return err
-
-				else if error is false
-					return @error theRule, key, rule.message, rule
+				else
+					error = @rules[theRule].test.call context, obj[key], rule
+					if error is false
+						return @error theRule, key, rule.message, rule
 
 		return false
 
@@ -197,7 +198,6 @@ Validator.addRule 'equals',
 		return str == to
 
 Validator.addRule 'list',
-	recurrent: true
 	message: "invalid %s list"
 	ruleset: 'required'
 	test: (array, rule) ->
@@ -206,12 +206,10 @@ Validator.addRule 'list',
 
 		for element, index in array
 			error = @validate {element:element}, {element: ruleset}
-			if error.length
-				e = {}
-				e[index] = error
-				errors.push e
+			if error.length then return false
 
-		return errors
+
+		return true
 
 Validator.addRule 'notEmpty',
 	message: "%s can't be empty array"

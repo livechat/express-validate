@@ -34,7 +34,7 @@ describe "Validator", ()->
 			validator.testInternal({key: "-1"}, "integer", "key").should.be.false
 			validator.testInternal({key: "1"}, "integer", "key").should.be.false
 			validator.testInternal({key: "0"}, "integer", "key").should.be.false
-		
+
 	describe "validate", ->
 		it "should validate simple object", () ->
 			validator.validate({key: "value"}, {key: "required"}).length.should.equal 0

@@ -11,7 +11,7 @@
 			"email": "b.kubiak@livechatinc.com"
 		}
 	],
-	"version": "0.1.9",
+	"version": "0.1.10",
 	"homepage": "https://github.com/livechat/express-validate",
 	"repository": {
 		"type": "git",
@@ -28,6 +28,7 @@
 		"coffee-script": "1.9.2",
 		"mocha": "1.8.x",
 		"should": "1.3.0",
+		"express": "2.x",
 		"sinon": "*"
 	},
 	"keywords": [
