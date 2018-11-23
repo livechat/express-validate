@@ -125,16 +125,26 @@ Validator.addRule 'lengthBetween',
 		return (low <= len <= high)
 
 Validator.addRule 'minLength',
-	message: "%s must be at least %minLength characters long"
+	message: ""
 	minLength: 1
 	test: (str, rule) ->
+		if _.isArray str
+			@message = "%s must be at least %minLength elements long"
+		else
+			@message = "%s must be at least %minLength characters long"
+
 		minLength = rule?.minLength or @minLength
 		return @rules.lengthBetween.test str, {low: minLength, high: Infinity}
 
 Validator.addRule 'maxLength',
-	message: "%s must be at most %maxLength characters long"
+	message: ""
 	maxLength: 1
 	test: (str, rule) ->
+		if _.isArray str
+			@message = "%s must be at most %maxLength elements long"
+		else
+			@message = "%s must be at most %maxLength characters long"
+
 		maxLength = rule?.maxLength or @maxLength
 		return @rules.lengthBetween.test str, {low: 0, high: maxLength}
 
