@@ -116,7 +116,8 @@ Validator.addRule 'lengthBetween',
 	low: 0
 	high: 5
 	test: (str, rule) ->
-		return false unless typeof str == 'string'
+		unless typeof str is 'string' or _.isArray str
+			return false
 
 		low = rule.low or @low
 		high = rule.high or @high

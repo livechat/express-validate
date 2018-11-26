@@ -17,6 +17,9 @@ describe "Validator", ()->
 		it "max length rule", () ->
 			validator.testInternal({key: "ads"}, "maxLength", "key").should.not.be.false
 			validator.testInternal({key: "ads"}, {rule: "maxLength", maxLength:20}, "key").should.be.false
+			validator.testInternal({key: ["ads"]}, {rule: "maxLength", maxLength:2}, "key").should.be.false
+			validator.testInternal({key: ["a", "s", "d"]}, {rule: "maxLength", maxLength:2}, "key").should.not.be.false
+			validator.testInternal({key: {}}, {rule: "maxLength", maxLength:2}, "key").should.not.be.false
 
 		it "integer rule", () ->
 			validator.testInternal({key: "ads"}, "integer", "key").should.not.be.false
