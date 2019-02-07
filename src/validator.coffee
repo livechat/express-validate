@@ -110,7 +110,9 @@ Validator.addRule 'email',
 	((((([a-z0-9]{1}[a-z0-9\-]{0,62}[a-z0-9]{1})|[a-z0-9])\.)+[a-z]{2,32})|(\d{1,3}\.){3}\d{1,3}(\:\d{1,5})?)$
 	///i
 	test: (str) ->
-		return @rules.maxLength.test(str, {maxLength: @maxLength}) and @regex.test str
+		unless typeof str is 'string'
+			return false
+		return str.length <= @maxLength and @regex.test str
 
 Validator.addRule 'lengthBetween',
 	message: "%s must be between %low and %high characters long"
