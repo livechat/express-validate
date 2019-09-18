@@ -180,7 +180,7 @@ Validator.addRule 'lowerThan',
 Validator.addRule 'nonNegative',
 	message: "%s must be non-negative"
 	test: (str) ->
-		return @rules.between.test str, {low: -1, high: Infinity}
+		return @rules.between.test str, {low: 0, high: Infinity}
 
 Validator.addRule 'positive',
 	message: "%s must be positive"
