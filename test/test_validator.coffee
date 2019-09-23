@@ -38,6 +38,18 @@ describe "Validator", ()->
 			validator.testInternal({key: "1"}, "integer", "key").should.be.false
 			validator.testInternal({key: "0"}, "integer", "key").should.be.false
 
+		it "non-negative rule", () ->
+			validator.testInternal({key: "-1"}, "nonNegative", "key").should.not.be.false
+			validator.testInternal({key: -1}, "nonNegative", "key").should.not.be.false
+			validator.testInternal({key: -2}, "nonNegative", "key").should.not.be.false
+			validator.testInternal({key: -223572357235}, "nonNegative", "key").should.not.be.false
+
+			validator.testInternal({key: "0"}, "nonNegative", "key").should.be.false
+			validator.testInternal({key: 0}, "nonNegative", "key").should.be.false
+			validator.testInternal({key: 1}, "nonNegative", "key").should.be.false
+			validator.testInternal({key: 2}, "nonNegative", "key").should.be.false
+			validator.testInternal({key: 9235472346}, "nonNegative", "key").should.be.false
+
 	describe "validate", ->
 		it "should validate simple object", () ->
 			validator.validate({key: "value"}, {key: "required"}).length.should.equal 0
