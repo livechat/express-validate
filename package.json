@@ -18,6 +18,9 @@
 		"url": "git://github.com/livechat/express-validate.git"
 	},
 	"main": "./index.js",
+	"scripts": {
+		"postinstall": "cake build"
+	  },
 	"engines": {
 		"node": "*"
 	},
