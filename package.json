@@ -11,13 +11,16 @@
 			"email": "b.kubiak@livechatinc.com"
 		}
 	],
-	"version": "0.1.7",
+	"version": "0.1.8",
 	"homepage": "https://github.com/livechat/express-validate",
 	"repository": {
 		"type": "git",
 		"url": "git://github.com/livechat/express-validate.git"
 	},
 	"main": "./index.js",
+	"scripts": {
+		"postinstall": "cake build"
+	  },
 	"engines": {
 		"node": "*"
 	},
