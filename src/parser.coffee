@@ -37,4 +37,13 @@ Parser.addParser 'integer',
 	parse: (value) ->
 		return parseInt(value, 10)
 
+Parser.addParser 'array',
+	parse: (value) ->
+		if value instanceof Array
+			return value
+		if typeof value is "string"
+			return value.split ","
+		else
+			return [value]
+
 module.exports = Parser

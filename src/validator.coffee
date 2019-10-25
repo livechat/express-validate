@@ -17,8 +17,14 @@ Validator =
 	# (it has to have both test & message properties)
 	checkRule: (name) ->
 		rule = @rules[name]
-		if typeof name == 'string' and rule and typeof rule.test == 'function' and typeof rule.message == 'string'
-			return true
+
+		switch rule.recurrent
+			when true
+				if typeof name == 'string' and rule and rule.ruleset
+					return true
+			else
+				if typeof name == 'string' and rule and typeof rule.test == 'function' and typeof rule.message == 'string'
+					return true
 
 		throw new Error name + ' is not a complete rule. A complete rule must contain both `test` function and `message` string.'
 
@@ -47,15 +53,33 @@ Validator =
 
 		if @checkRule(theRule)
 			# allow rules using other rules by appling @rules to `test` method context
+			unless @rules[theRule].recurrent? then @rules[theRule].recurrent = false
+
 			context = _.defaults @rules[theRule], @
 			if theRule == 'required' or obj[key]?
-				unless @rules[theRule].test.call context, obj[key], rule
-					return @error theRule, key, rule.message, rule
+
+				if @rules[theRule].recurrent
+					error = @validate obj[key], @rules[theRule].ruleset
+					if error.length
+						message = @error theRule, key, rule.message, rule
+						err = {}
+						err[message] = error
+						return err
+				else
+					error = @rules[theRule].test.call context, obj[key], rule
+					if error is false
+						return @error theRule, key, rule.message, rule
 
 		return false
 
 	validate: (obj, ruleset) ->
 		errors = []
+		if _.isString ruleset
+			try
+				ruleset = @rules[ruleset].ruleset
+			catch e
+				throw new Error "missing #{ruleset} validation rule"
+
 		for key, rule of ruleset
 			# check if it's an array of rules
 			if Array.isArray rule
@@ -78,6 +102,7 @@ Validator.addRule 'required',
 
 Validator.addRule 'email',
 	message: "%s must be a valid e-mail address"
+	maxLength: 254 # RFC 3696 with errata 246
 	regex: ///^
 	(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*
 	|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")
@@ -86,14 +111,17 @@ Validator.addRule 'email',
 	(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])
 	///i
 	test: (str) ->
-		return @regex.test str
+		unless typeof str is 'string'
+			return false
+		return str.length <= @maxLength and @regex.test str
 
 Validator.addRule 'lengthBetween',
 	message: "%s must be between %low and %high characters long"
 	low: 0
 	high: 5
 	test: (str, rule) ->
-		return false unless typeof str == 'string'
+		unless typeof str is 'string' or _.isArray str
+			return false
 
 		low = rule.low or @low
 		high = rule.high or @high
@@ -102,16 +130,26 @@ Validator.addRule 'lengthBetween',
 		return (low <= len <= high)
 
 Validator.addRule 'minLength',
-	message: "%s must be at least %minLength characters long"
+	message: ""
 	minLength: 1
 	test: (str, rule) ->
+		if _.isArray str
+			@message = "%s must be at least %minLength elements long"
+		else
+			@message = "%s must be at least %minLength characters long"
+
 		minLength = rule?.minLength or @minLength
 		return @rules.lengthBetween.test str, {low: minLength, high: Infinity}
 
 Validator.addRule 'maxLength',
-	message: "%s must be at most %maxLength characters long"
+	message: ""
 	maxLength: 1
 	test: (str, rule) ->
+		if _.isArray str
+			@message = "%s must be at most %maxLength elements long"
+		else
+			@message = "%s must be at most %maxLength characters long"
+
 		maxLength = rule?.maxLength or @maxLength
 		return @rules.lengthBetween.test str, {low: 0, high: maxLength}
 
@@ -143,7 +181,7 @@ Validator.addRule 'lowerThan',
 Validator.addRule 'nonNegative',
 	message: "%s must be non-negative"
 	test: (str) ->
-		return @rules.between.test str, {low: -1, high: Infinity}
+		return @rules.between.test str, {low: 0, high: Infinity}
 
 Validator.addRule 'positive',
 	message: "%s must be positive"
@@ -158,7 +196,7 @@ Validator.addRule 'negative',
 Validator.addRule 'integer',
 	message: "%s must be an integer"
 	test: (str) ->
-		return str % 1 == 0
+		return /^-?[0-9]+$/.test str
 
 Validator.addRule 'match',
 	message: "%s doesn't match the required pattern"
@@ -173,5 +211,52 @@ Validator.addRule 'equals',
 	test: (str, rule) ->
 		to = rule.to or @to
 		return str == to
+
+Validator.addRule 'list',
+	message: "invalid %s list"
+	ruleset: 'required'
+	test: (array, rule) ->
+		errors = []
+		ruleset = rule.ruleset || @ruleset
+
+		for element, index in array
+			error = @validate {element:element}, {element: ruleset}
+			if error.length then return false
+
+
+		return true
+
+Validator.addRule 'notEmpty',
+	message: "%s can't be empty array"
+	test: (obj) ->
+		return not _.isEmpty obj
+
+Validator.addRule 'array',
+	message: "%s must be an array"
+	test: (obj) ->
+		return _.isArray obj
+
+Validator.addRule 'binary',
+	message: "%s must be either '0' or '1'"
+	test: (str) ->
+		unless str? then return false
+		return str.toString() in ['0', '1']
+
+
+Validator.addRule 'order',
+	order: ['asc', 'desc']
+	message: "%s must be either 'asc' or 'desc'"
+	test: (order) ->
+		return order in @order
+
+Validator.addRule 'zipcode',
+	message: "%s must be valid zip code format XX-XXX"
+	test: (code) ->
+		return /(^\d{3}-\d{2}$)/.test code
+
+Validator.addRule 'deny',
+	message: "%s is forbidden"
+	test: ->
+		return false
 
 module.exports = Validator
