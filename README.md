@@ -55,8 +55,8 @@ Server code:
 express = require 'express'
 validator = require '../lib/express-validate'
 
-app = express.createServer()
-app.use express.bodyParser()
+app = express()
+app.use express.json()
 
 app.use validator()
 
@@ -118,8 +118,8 @@ Server code:
 express = require 'express'
 validator = require '../lib/express-validate'
 
-app = express.createServer()
-app.use express.bodyParser()
+app = express()
+app.use express.json()
 
 app.use validator
 	rules: [

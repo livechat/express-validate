@@ -18,7 +18,7 @@ validatorWrapper = (opts) ->
 
 	validatorMiddleware = (req, res, next) ->
 
-		req.parse = (ruleset) =>
+		req.parse = (ruleset) ->
 			req.files = parser.parse req.files, ruleset
 			req.p = parser.parse req.p, ruleset
 			req.query = parser.parse req.query, ruleset
@@ -35,20 +35,19 @@ validatorWrapper = (opts) ->
 
 			result = validator.validate params, rules
 
-			if result.length
-				if opts.asJSON
-					response = {errors: result}
-					if req.query.post_message
-						response.fromAPI = 1
-						b64 = new Buffer(JSON.stringify response).toString 'base64'
-						response =  "<script>window.parent.postMessage('#{b64}','*')</script>"
-					res.send response, 400
-					return false
-				else
-					res.send result.join('\n'), 400
-					return false
+			if result.length is 0 then return true
+
+			if opts.asJSON
+				response = { errors: result }
+				if req.query.post_message
+					response.fromAPI = 1
+					b64 = new Buffer(JSON.stringify response).toString 'base64'
+					response =  "<script>window.parent.postMessage('#{b64}','*')</script>"
+				res.status(400).send(response)
 			else
-				return true
+				res.status(400).send(result.join('\n'))
+
+			return false
 
 		next()
 
