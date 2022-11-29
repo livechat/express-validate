@@ -1,49 +1,47 @@
-express-validate
-================
-
+# express-validate
 
 A very simple Express middleware to… well, validate stuff.
 
 ## Available validators
 
-* required
-* email
-* equals
-* lengthBetween
-* maxLength
-* minLength
-* between
-* greaterThan
-* lowerThan
-* nonNegative
-* positive
-* negative
-* match
-* …write your your own!
+- required
+- email
+- equals
+- lengthBetween
+- maxLength
+- minLength
+- between
+- greaterThan
+- lowerThan
+- nonNegative
+- positive
+- negative
+- match
+- ...write your your own!
 
 ## Options
 
 ```
-validator = require '../lib/express-validate'
-app.use validator options
+var validator = require("../src/express-validate");
+app.use(validator(options));
 ```
 
 `options` is an object with possible properties:
 
-* `rules` - (*object*) - additional rules (described later)
-* `errorParser` - (*function*) - a function taking 3 arguments: `req`, `res` and `errors` (an array of error messages). If validation resulted in no errors, `errors` will be an empty array.
-  
-  example usage - returning JSON object
-  
-  ```
-  errorParser: (req, res, err) ->
-		res.send {
-			errors: err
-		}
-  ```
-  
-* `exposeMixedParams` - (*bool*) - if `true`, `req.p` will become an object containing params available in `req.params`, `req.query` and `req.body`.
+- `rules` - (_object_) - additional rules (described later)
+- `errorParser` - (_function_) - a function taking 3 arguments: `req`, `res` and `errors` (an array of error messages). If validation resulted in no errors, `errors` will be an empty array.
 
+  example usage - returning JSON object
+
+  ```
+  errorParser: function(req, res, err) {
+    return res.send({
+      errors: err
+    });
+  }
+  ```
+
+- `exposeMixedParams` - (_bool_) - if `true`, `req.p` will become an object containing params available in `req.params`, `req.query` and `req.body`.
 
 ## Usage examples
 
@@ -52,24 +50,27 @@ app.use validator options
 Server code:
 
 ```
-express = require 'express'
-validator = require '../lib/express-validate'
+var express = require("express");
+var validator = require("../src/express-validate");
 
-app = express()
-app.use express.json()
+var app = express();
+app.use(express.json());
+app.use(validator());
 
-app.use validator()
+app.get("/", function(req, res) {
+    req.validate({
+        name: "required", // single validation rule
+        mail: [
+            "required",
+            "email" // or an array of rules
+        ]
+    });
+    return res.send("it's ok");
+});
 
-app.get '/', (req, res) ->
-	req.validate {
-		name: 'required'             # single validation rule
-		mail: ['required', 'email']  # or an array of rules
-	}
-	
-	res.send "it's ok"
-
-app.listen 3000, () ->
-	console.log "Listening on 3000…"
+app.listen(3000, function() {
+    return console.log("Listening on 3000...");
+});
 ```
 
 Requests:
@@ -89,14 +90,14 @@ it's ok
 Validation code:
 
 ```
-   req.validate {
-		name: {rule: 'required', message: '%s is required!' }
-		age: ['required', {
-			rule: 'greaterThan'
-			than: 18
-			message: 'Hey, you must be over %than to see the content. Please, provide the correct %s' 
-		}]
-	}
+req.validate({
+    name: {rule: "required", message: "%s is required!"},
+    age: ["required", {
+        rule: "greaterThan",
+        than: 18,
+        message: "Hey, you must be over %than to see the content. Please, provide the correct %s",
+    }]
+})
 ```
 
 Requests:
@@ -115,50 +116,69 @@ it's ok
 Server code:
 
 ```
-express = require 'express'
-validator = require '../lib/express-validate'
+var express = require("express");
+var validator = require("../src/express-validate");
 
-app = express()
-app.use express.json()
+var app = express();
+app.use(express.json());
+app.use(validator({
+    rules: [
+        {
+            name: "FOO",
+            rule: {
+                message: "%s must equal FOO",
+                test: function(str) {
+                    if (!str) {
+                        return false; // it's not required
+                    }
+                    if (str !== "FOO") {
+                        return true;
+                    }
+                }
+            }
+        },
+        {
+            name: "lengthBetween",
+            rule: {
+                message: "%s must be between %low and %high characters long",
+                low: 3,
+                high: 5,
+                test: function(str, rule) {
+                    var high, len, low;
+                    if (!str) {
+                        return false;
+                    }
+                    if (typeof str !== "string") {
+                        return true;
+                    }
+                    low = rule.low || this.low;
+                    high = rule.high || this.high;
+                    len = str.length;
+                    if (!((low <= len && len <= high))) {
+                        return true;
+                    }
+                }
+            }
+        }
+    ]
+}));
 
-app.use validator
-	rules: [
-		{
-			name: 'FOO'
-			rule:
-				message: '%s must equal FOO'
-				test: (str) ->
-					return false unless str # it's not required
-					return true unless str == 'FOO'
-		}
-		{
-			name: 'lengthBetween'
-			rule:
-				message: '%s must be between %low and %high characters long'
-				low: 3
-				high: 5
-				test: (str, rule) ->
-					return false unless str 
-					return true unless typeof str == 'string'
-					
-					low = rule.low or @low
-					high = rule.high or @high
-					len = str.length
-					
-					return true unless low <= len <= high
-		}
-	]
+app.get("/", function(req, res) {
+    req.validate({
+        foo: "FOO",
+        str: {
+            rule: "lengthBetween",
+            low: 4,
+            high: 7
+        }
+    });
+    return res.send("it's ok");
+});
 
-app.get '/', (req, res) ->
-	req.validate {
-		foo: 'FOO'
-		str: { rule: 'lengthBetween', low: 4, high: 7 }
-	}
-	
-	res.send "it's ok"
+app.listen(3000, function() {
+    return console.log("Listening on 3000...");
+});
 
-app.listen 3000, () ->
-	console.log "Listening on 3000…"
 ```
 
 Requests:
@@ -176,10 +196,9 @@ it's ok
 str must be between 4 and 7 characters long
 ```
 
+## License
 
-## License 
-
-*(The MIT License)*
+_(The MIT License)_
 
 Copyright (c) 2012 Maciej Pawłowski <me@mpawlowski.pl>
 

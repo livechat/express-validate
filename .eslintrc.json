@@ -1,0 +1,19 @@
+{
+  "extends": ["prettier"],
+  "rules": {
+    "no-shadow": 1,
+    "spaced-comment": "error",
+    "no-else-return": "error",
+    "lines-between-class-members": "error",
+    "prefer-arrow-callback": "error",
+    "arrow-body-style": "error",
+    "quotes": ["error", "double", { "avoidEscape": true }]
+  },
+  "env": {
+    "es6": true
+  },
+  "ignorePatterns": ["**/test/**/*.js"],
+  "parserOptions": {
+    "ecmaVersion": 2022
+  }
+}
