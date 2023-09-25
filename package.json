@@ -21,8 +21,7 @@
   "scripts": {
     "test": "mocha",
     "prettier": "prettier --write \"**/*.{js,md,json}\"",
-    "eslint": "eslint .",
-    "prepare": "husky install"
+    "eslint": "eslint ."
   },
   "engines": {
     "node": "*"
